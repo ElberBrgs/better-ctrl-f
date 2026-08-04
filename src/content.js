@@ -160,6 +160,10 @@
   async function deepFind() {
     if (searching) return;
     searching = true;
+    matches = [];
+    current = -1;
+    clearHighlights();
+    updateCount();
     statusEl.textContent = "procurando…";
     const start = Date.now();
     let steps = 0;
