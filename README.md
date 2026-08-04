@@ -1,53 +1,91 @@
 # Finder-C
 
-> Busca na página sem limites de scroll — encontre qualquer texto, mesmo em páginas com scroll infinito como o X (Twitter).
+> Busca na página sem limites de scroll — encontre qualquer texto mesmo em páginas com scroll infinito como o X (Twitter).
 
-## Problema
+Extensão de navegador (Chrome/Edge, Manifest V3) **sem dependências, sem build, sem coleta de dados**. `Ctrl+F` vira uma busca profunda: se a palavra não está renderizada, a página rola sozinha até ela aparecer — e o Finder-C salta direto para a ocorrência.
 
-O `Ctrl + F` nativo do navegador só encontra o texto que já está **renderizado no DOM**. Em páginas com scroll virtualizado ou infinito (X/Twitter, feeds de redes sociais, longos dashboards), o conteúdo fora da área visível literalmente não existe no DOM — então a busca retorna "0/0" ou não acha nada, e você é obrigado a rolar manualmente até a palavra aparecer.
+```
+Ctrl+F → digita "você"
+  → Finder-C: procurando…   (a página rola sozinha, carregando o feed)
+  → Finder-C: 1/3           (salto direto para a ocorrência em azul,
+                             demais em amarelo, contador n/m)
+```
 
-## Solução
+## Por que existe
 
-Finder-C é uma extensão de navegador que faz **busca profunda (deep find)**:
+O `Ctrl+F` nativo só enxerga o que já está **renderizado no DOM**. Em páginas com scroll virtualizado — X/Twitter, feeds de redes sociais, dashboards longos — o conteúdo fora da viewport literalmente não existe: a busca retorna "0 resultados" para algo que está ali, a 50 telas de distância. Você é obrigado a rolar manualmente, de olho aberto, até a palavra aparecer.
 
-1. Você seleciona um texto (ou digita na caixa de busca da extensão) e aciona o atalho.
-2. Se a palavra não estiver visível, a extensão rola a página automaticamente, forçando o carregamento do conteúdo virtualizado.
-3. Ao encontrar, ela **salta direto para a correspondência** e a destaca — não importa o quanto foi preciso scrollar.
+O Finder-C resolve isso forçando a renderização: rola a página em etapas enquanto procura, e para no momento em que o termo é encontrado. Funciona inclusive ignorando acentos e maiúsculas ("voce" encontra "você").
 
-## Roadmap
+## Instalação
 
-- [x] MVP: interceptação de `Ctrl+F` + busca profunda com auto-scroll
-- [x] Overlay de busca próprio (caixa de texto estilo Ctrl+F nativo)
-- [x] Navegação entre múltiplas ocorrências (próxima/anterior, contador `n/m`)
-- [x] Ignorar acentos e maiúsculas/minúsculas
-- [x] Destaque de todas as ocorrências via CSS Custom Highlight API
-- [ ] Configurações (velocidade de scroll, cor do destaque, sites habilitados)
-- [ ] Publicação na Chrome Web Store / Firefox Add-ons
+```text
+# Chrome ou Edge — a partir da release (recomendado)
+1. Baixe finder-c-<versão>.zip na página de Releases e extraia
+2. Acesse chrome://extensions  (ou edge://extensions)
+3. Ative o "Modo do desenvolvedor"
+4. "Carregar sem compactação" / "Carregar descompactada" → selecione a pasta extraída
+```
 
-## Instalação (modo desenvolvedor)
+```sh
+# A partir do código-fonte
+git clone https://github.com/ElberBrgs/finder-c
+# depois carregue a pasta finder-c como acima
+```
 
-1. Clone este repositório.
-2. No Chrome, acesse `chrome://extensions`.
-3. Ative o **Modo do desenvolvedor** (canto superior direito).
-4. Clique em **Carregar sem compactação** e selecione a pasta `finder-c`.
+> Como é uma extensão carregada em modo desenvolvedor, o navegador pode perguntar na inicialização se quer desativá-la — escolha **Manter**.
 
 ## Uso
 
-1. Pressione `Ctrl + F` em qualquer página — o overlay do Finder-C abre (se houver texto selecionado, ele já preenche a busca).
-2. Digite a palavra. Se ela não estiver renderizada, a extensão **rola a página automaticamente** até encontrá-la.
-3. Navegue entre ocorrências com `Enter` / `Shift+Enter` ou os botões ↑ ↓. O contador mostra `n/m`.
-4. `Esc` fecha.
+| Ação | Atalho |
+| --- | --- |
+| Abrir a busca | `Ctrl+F` (com texto selecionado, já preenche) |
+| Próxima ocorrência | `Enter` ou botão `↓` |
+| Ocorrência anterior | `Shift+Enter` ou botão `↑` |
+| Fechar | `Esc` ou botão `✕` |
 
-## Estrutura
+- Se o termo já está no DOM, o salto é imediato.
+- Se não está, o Finder-C entra em **busca profunda**: rola a página automaticamente (status "procurando…") até encontrar ou chegar ao fim — com tentativa final a partir do topo.
+- Limites de segurança: 200 passos de scroll ou 30 segundos.
 
+## Desenvolvimento
+
+Sem toolchain: o projeto é JavaScript vanilla. Edite, recarregue a extensão em `chrome://extensions` e teste.
+
+```sh
+node --check src/content.js         # sintaxe
+node scripts/validate-manifest.mjs  # manifest + existência de ícones/scripts
+node --test                         # testes de unidade
 ```
-finder-c/
-├── manifest.json      # Manifest V3 da extensão
-├── src/
-│   └── content.js     # Content script: busca profunda + auto-scroll
-└── README.md
-```
+
+As decisões arquiteturais (Shadow DOM fechado, CSS Custom Highlight API, algoritmo de busca profunda, borda de eventos) estão documentadas em [docs/arquitetura.md](docs/arquitetura.md).
+
+CI roda em todo push e PR. Releases são geradas automaticamente ao empurrar um tag `v*.*.*` — o workflow valida, empacota o zip, extrai a seção da versão do [CHANGELOG.md](CHANGELOG.md) e publica o GitHub Release com checksums.
+
+## Segurança
+
+- A extensão **não coleta nem transmite nenhum dado**; toda a busca é local.
+- Overlay em Shadow DOM fechado, isolado do DOM da página.
+- CI valida sintaxe, manifest e testes em todo push/PR; **Dependabot** mantém as GitHub Actions atualizadas.
+- Relato privado de vulnerabilidades: veja [SECURITY.md](SECURITY.md).
+
+## Quão frágil é isso?
+
+A busca profunda depende do comportamento de virtualização de cada site. Sites que **removem** do DOM o conteúdo já rolado (o X mantém uma janela de tweets renderizada) fazem com que o contador `n/m` reflita apenas o que está carregado naquele momento — as ocorrências são recalculadas a cada busca. Se um site renderizar conteúdo sob demanda de formas exóticas (intersection observers agressivos, conteúdo em canvas), a busca pode não encontrar texto que visualmente existe. Os limites de 200 passos / 30 s existem para nunca prender a página em um loop.
+
+## Roadmap
+
+- [x] Busca profunda com auto-scroll
+- [x] Overlay próprio com navegação `n/m`
+- [x] Destaque de ocorrências via CSS Custom Highlight API
+- [ ] Fallback de destaque para navegadores sem a API de Highlight (Firefox)
+- [ ] Página de configurações (velocidade de scroll, cor, sites habilitados)
+- [ ] Publicação na Chrome Web Store / Microsoft Edge Add-ons
+
+## Aviso
+
+Projeto pessoal/educacional. Ao usar em sites de terceiros, respeite os Termos de Serviço de cada plataforma.
 
 ## Licença
 
-MIT
+[MIT](LICENSE) © ElberBrgs

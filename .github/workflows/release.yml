@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validação (mesma do CI)
+        run: |
+          node --check src/content.js
+          node scripts/validate-manifest.mjs
+          node --test
+
+      - name: Versão a partir do manifest
+        id: version
+        run: |
+          VERSION=$(node -p "require('./manifest.json').version")
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.ref_name }}" != "v$VERSION" ]; then
+            echo "Tag ${{ github.ref_name }} diverge de manifest.json (v$VERSION)"
+            exit 1
+          fi
+
+      - name: Empacota a extensão
+        run: |
+          mkdir -p dist
+          zip -r "dist/finder-c-${{ steps.version.outputs.VERSION }}.zip" \
+            manifest.json LICENSE README.md src icons docs
+          cd dist && sha256sum "finder-c-${{ steps.version.outputs.VERSION }}.zip" \
+            > "finder-c-${{ steps.version.outputs.VERSION }}.zip.sha256"
+
+      - name: Extrai a seção da versão do CHANGELOG
+        run: |
+          awk -v ver="${{ steps.version.outputs.VERSION }}" '
+            BEGIN { hdr = "## [" ver "]" }
+            index($0, hdr) == 1 { flag=1; next }
+            flag && index($0, "## [") == 1 { exit }
+            flag { print }
+          ' CHANGELOG.md > changelog_section.md
+          [ -s changelog_section.md ] || echo "Versão ${{ steps.version.outputs.VERSION }}" > changelog_section.md
+
+      - name: Cria o GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            cat changelog_section.md
+            echo ""
+            echo "## Instalação"
+            echo ""
+            echo "1. Baixe e extraia \`finder-c-${{ steps.version.outputs.VERSION }}.zip\`"
+            echo "2. Acesse \`chrome://extensions\` (Chrome) ou \`edge://extensions\` (Edge)"
+            echo "3. Ative o **Modo do desenvolvedor** → **Carregar sem compactação/descompactada** → selecione a pasta extraída"
+            echo ""
+            echo "## Checksums (sha256)"
+            echo ""
+            echo '```'
+            cat "dist/finder-c-${{ steps.version.outputs.VERSION }}.zip.sha256"
+            echo '```'
+          } > release_notes.md
+          gh release create "${{ github.ref_name }}" \
+            "dist/finder-c-${{ steps.version.outputs.VERSION }}.zip" \
+            "dist/finder-c-${{ steps.version.outputs.VERSION }}.zip.sha256" \
+            --title "Finder-C ${{ github.ref_name }}" \
+            --notes-file release_notes.md
