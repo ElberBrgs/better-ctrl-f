@@ -1,4 +1,4 @@
-# Arquitetura do Finder-C
+# Arquitetura do Better Ctrl+F
 
 Documento para contribuidores: as decisões por trás do código. O README é para usuários; aqui é o "por quê".
 
@@ -21,7 +21,7 @@ Eventos de teclado têm `composed: true`, ou seja, atravessam o shadow root. Se 
 
 ## Decisão 3 — CSS Custom Highlight API em vez de spans
 
-O destaque das ocorrências usa `CSS.highlights` (`::highlight(finder-c-all)` e `::highlight(finder-c-current)`) sobre `Range`s, em vez de envolver matches em `<span>`s. Motivos:
+O destaque das ocorrências usa `CSS.highlights` (`::highlight(better-ctrl-f-all)` e `::highlight(better-ctrl-f-current)`) sobre `Range`s, em vez de envolver matches em `<span>`s. Motivos:
 
 - Não muta o DOM da página (sites reativos como o X reconciliam o DOM constantemente e spans injetados seriam destruídos — ou pior, quebrariam a reconciliação);
 - Criar e limpar milhares de highlights é uma operação de render, não de layout/DOM — muito mais barato;

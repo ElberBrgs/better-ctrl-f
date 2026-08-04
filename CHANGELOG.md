@@ -32,6 +32,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - MVP: interceptação de `Ctrl+F` com busca profunda — auto-scroll em etapas para carregar conteúdo virtualizado (ex.: X/Twitter) até encontrar o termo.
 - Normalização de texto que ignora acentos e maiúsculas/minúsculas.
 
-[0.2.1]: https://github.com/ElberBrgs/finder-c/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/ElberBrgs/finder-c/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/ElberBrgs/finder-c/compare/9f359f5...v0.2.0
+[0.2.1]: https://github.com/ElberBrgs/better-ctrl-f/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/ElberBrgs/better-ctrl-f/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/ElberBrgs/better-ctrl-f/compare/9f359f5...v0.2.0

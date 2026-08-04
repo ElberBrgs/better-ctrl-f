@@ -1,27 +1,27 @@
-# Finder-C
+# Better Ctrl+F
 
 > Busca na página sem limites de scroll — encontre qualquer texto mesmo em páginas com scroll infinito como o X (Twitter).
 
-Extensão de navegador (Chrome/Edge, Manifest V3) **sem dependências, sem build, sem coleta de dados**. `Ctrl+F` vira uma busca profunda: se a palavra não está renderizada, a página rola sozinha até ela aparecer — e o Finder-C salta direto para a ocorrência.
+Extensão de navegador (Chrome/Edge, Manifest V3) **sem dependências, sem build, sem coleta de dados**. `Ctrl+F` vira uma busca profunda: se a palavra não está renderizada, a página rola sozinha até ela aparecer — e o Better Ctrl+F salta direto para a ocorrência.
 
 ```
 Ctrl+F → digita "você"
-  → Finder-C: procurando…   (a página rola sozinha, carregando o feed)
-  → Finder-C: 1/3           (salto direto para a ocorrência em azul,
-                             demais em amarelo, contador n/m)
+  → Better Ctrl+F: procurando…   (a página rola sozinha, carregando o feed)
+  → Better Ctrl+F: 1/3           (salto direto para a ocorrência em azul,
+                                  demais em amarelo, contador n/m)
 ```
 
 ## Por que existe
 
 O `Ctrl+F` nativo só enxerga o que já está **renderizado no DOM**. Em páginas com scroll virtualizado — X/Twitter, feeds de redes sociais, dashboards longos — o conteúdo fora da viewport literalmente não existe: a busca retorna "0 resultados" para algo que está ali, a 50 telas de distância. Você é obrigado a rolar manualmente, de olho aberto, até a palavra aparecer.
 
-O Finder-C resolve isso forçando a renderização: rola a página em etapas enquanto procura, e para no momento em que o termo é encontrado. Funciona inclusive ignorando acentos e maiúsculas ("voce" encontra "você").
+O Better Ctrl+F resolve isso forçando a renderização: rola a página em etapas enquanto procura, e para no momento em que o termo é encontrado. Funciona inclusive ignorando acentos e maiúsculas ("voce" encontra "você").
 
 ## Instalação
 
 ```text
 # Chrome ou Edge — a partir da release (recomendado)
-1. Baixe finder-c-<versão>.zip na página de Releases e extraia
+1. Baixe better-ctrl-f-<versão>.zip na página de Releases e extraia
 2. Acesse chrome://extensions  (ou edge://extensions)
 3. Ative o "Modo do desenvolvedor"
 4. "Carregar sem compactação" / "Carregar descompactada" → selecione a pasta extraída
@@ -29,8 +29,8 @@ O Finder-C resolve isso forçando a renderização: rola a página em etapas enq
 
 ```sh
 # A partir do código-fonte
-git clone https://github.com/ElberBrgs/finder-c
-# depois carregue a pasta finder-c como acima
+git clone https://github.com/ElberBrgs/better-ctrl-f
+# depois carregue a pasta better-ctrl-f como acima
 ```
 
 > Como é uma extensão carregada em modo desenvolvedor, o navegador pode perguntar na inicialização se quer desativá-la — escolha **Manter**.
@@ -45,7 +45,7 @@ git clone https://github.com/ElberBrgs/finder-c
 | Fechar | `Esc` ou botão `✕` |
 
 - Se o termo já está no DOM, o salto é imediato.
-- Se não está, o Finder-C entra em **busca profunda**: rola a página automaticamente (status "procurando…") até encontrar ou chegar ao fim — com tentativa final a partir do topo.
+- Se não está, o Better Ctrl+F entra em **busca profunda**: rola a página automaticamente (status "procurando…") até encontrar ou chegar ao fim — com tentativa final a partir do topo.
 - Limites de segurança: 200 passos de scroll ou 30 segundos.
 
 ## Desenvolvimento

@@ -18,7 +18,7 @@ test("ignora maiúsculas/minúsculas", () => {
 });
 
 test("texto já normalizado não muda", () => {
-  assert.equal(normalize("finder-c"), "finder-c");
+  assert.equal(normalize("better-ctrl-f"), "better-ctrl-f");
 });
 
 test("match normalizado encontra original acentuado", () => {

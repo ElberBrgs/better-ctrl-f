@@ -1,4 +1,4 @@
-// Finder-C — content script
+// Better Ctrl+F — content script
 // Overlay de busca próprio (estilo Ctrl+F nativo) com busca profunda:
 // rola a página automaticamente para carregar conteúdo virtualizado
 // (ex.: X/Twitter) até encontrar a palavra, então salta direto para ela.
