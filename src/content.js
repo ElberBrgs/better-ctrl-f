@@ -219,6 +219,15 @@
     if (e.key === "Enter") { e.preventDefault(); goTo(current + (e.shiftKey ? -1 : 1)); }
     if (e.key === "Escape") close();
   });
+  // Impede que atalhos globais da página (ex.: composer do X) reajam à digitação
+  // dentro do overlay — eventos de teclado atravessam o shadow root (composed).
+  // Fase bubble: o input já processou suas teclas antes de bloquearmos a subida.
+  for (const type of ["keydown", "keyup", "keypress", "beforeinput"]) {
+    host.addEventListener(type, (e) => {
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+    });
+  }
   shadow.getElementById("next").addEventListener("click", () => goTo(current + 1));
   shadow.getElementById("prev").addEventListener("click", () => goTo(current - 1));
   shadow.getElementById("close").addEventListener("click", close);
