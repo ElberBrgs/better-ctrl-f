@@ -17,9 +17,10 @@ Finder-C é uma extensão de navegador que faz **busca profunda (deep find)**:
 ## Roadmap
 
 - [x] MVP: interceptação de `Ctrl+F` + busca profunda com auto-scroll
-- [ ] Overlay de busca próprio (caixa de texto estilo Ctrl+F nativo)
-- [ ] Navegação entre múltiplas ocorrências (próxima/anterior, contador `n/m`)
-- [ ] Ignorar acentos e maiúsculas/minúsculas (já parcial)
+- [x] Overlay de busca próprio (caixa de texto estilo Ctrl+F nativo)
+- [x] Navegação entre múltiplas ocorrências (próxima/anterior, contador `n/m`)
+- [x] Ignorar acentos e maiúsculas/minúsculas
+- [x] Destaque de todas as ocorrências via CSS Custom Highlight API
 - [ ] Configurações (velocidade de scroll, cor do destaque, sites habilitados)
 - [ ] Publicação na Chrome Web Store / Firefox Add-ons
 
@@ -32,9 +33,10 @@ Finder-C é uma extensão de navegador que faz **busca profunda (deep find)**:
 
 ## Uso
 
-1. Selecione na página o texto que deseja localizar (ou em breve: digite no overlay).
-2. Pressione `Ctrl + F`.
-3. O Finder-C rola a página e salta diretamente para a correspondência destacada.
+1. Pressione `Ctrl + F` em qualquer página — o overlay do Finder-C abre (se houver texto selecionado, ele já preenche a busca).
+2. Digite a palavra. Se ela não estiver renderizada, a extensão **rola a página automaticamente** até encontrá-la.
+3. Navegue entre ocorrências com `Enter` / `Shift+Enter` ou os botões ↑ ↓. O contador mostra `n/m`.
+4. `Esc` fecha.
 
 ## Estrutura
 
