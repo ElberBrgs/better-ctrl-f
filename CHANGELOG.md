@@ -5,6 +5,13 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [Não lançado]
+
+### Adicionado
+
+- Script `install.ps1`: instalação em um comando (`irm ... | iex`) — baixa a release mais recente, extrai em pasta fixa e abre o `edge://extensions`.
+- GIF animado de instalação no README (`docs/instalacao.gif`).
+
 ## [0.2.1] - 2026-08-04
 
 ### Corrigido

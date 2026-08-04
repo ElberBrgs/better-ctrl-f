@@ -19,8 +19,21 @@ O Better Ctrl+F resolve isso forçando a renderização: rola a página em etapa
 
 ## Instalação
 
+### Um comando (recomendado)
+
+```powershell
+# PowerShell — baixa a release mais recente e extrai numa pasta fixa
+irm https://raw.githubusercontent.com/ElberBrgs/better-ctrl-f/main/scripts/install.ps1 | iex
+```
+
+O script abre o `edge://extensions` ao final. Restam 3 cliques:
+
+![Instalação em ~20 segundos](docs/instalacao.gif)
+
+### Manual
+
 ```text
-# Chrome ou Edge — a partir da release (recomendado)
+# Chrome ou Edge — a partir da release
 1. Baixe better-ctrl-f-<versão>.zip na página de Releases e extraia
 2. Acesse chrome://extensions  (ou edge://extensions)
 3. Ative o "Modo do desenvolvedor"
