@@ -66,12 +66,12 @@ git clone https://github.com/ElberBrgs/better-ctrl-f
 Sem toolchain: o projeto é JavaScript vanilla. Edite, recarregue a extensão em `chrome://extensions` e teste.
 
 ```sh
-node --check src/content.js         # sintaxe
-node scripts/validate-manifest.mjs  # manifest + existência de ícones/scripts
-node --test                         # testes de unidade
+npm test             # estática + manifest + testes de unidade
+npm run test:bdd     # cenários Gherkin (cucumber-js, pt-BR)
+npm run coverage     # cobertura do núcleo (meta: 100% linhas/funções)
 ```
 
-As decisões arquiteturais (Shadow DOM fechado, CSS Custom Highlight API, algoritmo de busca profunda, borda de eventos) estão documentadas em [docs/arquitetura.md](docs/arquitetura.md).
+As decisões arquiteturais (Shadow DOM fechado, CSS Custom Highlight API, algoritmo de busca profunda, borda de eventos) estão em [docs/arquitetura.md](docs/arquitetura.md). Estratégia de testes, casos de aceite e métricas de qualidade em [docs/qa/](docs/qa/).
 
 CI roda em todo push e PR. Releases são geradas automaticamente ao empurrar um tag `v*.*.*` — o workflow valida, empacota o zip, extrai a seção da versão do [CHANGELOG.md](CHANGELOG.md) e publica o GitHub Release com checksums.
 

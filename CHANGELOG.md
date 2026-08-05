@@ -5,6 +5,21 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [0.3.0] - 2026-08-05
+
+### Corrigido
+
+- **Composer do X não abre mais ao digitar no overlay** (BUG-02): o elemento host agora se apresenta como campo editável (`contentEditable`), fazendo handlers globais da página ignorarem as teclas; e a busca profunda retém o foco do input a cada passo, pois o feed virtualizado re-renderizava e roubava o foco — a tecla seguinte caía na página.
+- **Fim do scroll infinito quando o termo não existe** (BUG-03): novos limites (60 passos / 15 s), detecção de estagnação pela altura do documento (em feed infinito o scrollY sempre cresce; a altura total é o sinal honesto de fim) e **cancelamento real** — `Esc`, fechar o overlay ou iniciar nova busca interrompem o scroll imediatamente.
+
+### Adicionado
+
+- Núcleo de decisão puro e testável (`src/search-core.js`): normalização, limites da busca profunda, detecção de estagnação e navegação circular.
+- 15 testes de unidade (`node:test`) — cobertura de 100% de linhas/funções do núcleo.
+- 10 cenários Gherkin executáveis em pt-BR (`cucumber-js`) cobrindo busca, busca profunda e navegação.
+- Documentos de QA: `docs/qa/plano-de-testes.md` (estratégia, casos de aceite A1–A9, registro de defeitos, procedimento de regressão) e `docs/qa/metricas.md`.
+- CI e pipeline de release agora rodam também os testes BDD.
+
 ## [Não lançado]
 
 ### Adicionado
@@ -39,6 +54,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - MVP: interceptação de `Ctrl+F` com busca profunda — auto-scroll em etapas para carregar conteúdo virtualizado (ex.: X/Twitter) até encontrar o termo.
 - Normalização de texto que ignora acentos e maiúsculas/minúsculas.
 
+[0.3.0]: https://github.com/ElberBrgs/better-ctrl-f/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/ElberBrgs/better-ctrl-f/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/ElberBrgs/better-ctrl-f/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ElberBrgs/better-ctrl-f/compare/9f359f5...v0.2.0

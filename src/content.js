@@ -7,19 +7,18 @@
   if (window.__finderCLoaded) return;
   window.__finderCLoaded = true;
 
+  const { normalize, verificarLimites, rastrearEstagnacao, indiceCircular } =
+    window.BetterCtrlFCore;
+
   const STEP_MS = 220;
-  const MAX_STEPS = 200;
-  const MAX_WAIT_MS = 30000;
+  const MAX_STEPS = 60;        // ~48 telas de scroll — bem menor que antes
+  const MAX_WAIT_MS = 15000;   // 15 s no máximo por busca
+  const STAGNANT_LIMIT = 3;    // passos sem crescimento da página = feed esgotado
 
   let matches = [];        // Array<Range>
   let current = -1;
-  let searching = false;
+  let buscaId = 0;         // token de cancelamento da busca profunda
   let query = "";
-
-  // ---------- normalização ----------
-  function normalize(s) {
-    return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-  }
 
   // ---------- coleta de matches ----------
   function collectRanges(q) {
@@ -89,6 +88,10 @@
   // ---------- overlay (Shadow DOM) ----------
   const host = document.createElement("div");
   host.id = "__finder_c_root";
+  // Faz handlers globais da página (que abrem diálogos ao teclar) tratarem
+  // eventos vindos do overlay como digitação em campo editável.
+  host.contentEditable = "true";
+  host.tabIndex = -1;
   const shadow = host.attachShadow({ mode: "closed" });
   shadow.innerHTML = `
     <style>
@@ -135,11 +138,11 @@
   }
 
   function close() {
+    buscaId++; // cancela qualquer busca profunda em andamento
     host.remove();
     clearHighlights();
     matches = [];
     current = -1;
-    searching = false;
   }
 
   function updateCount() {
@@ -148,7 +151,7 @@
 
   function goTo(i) {
     if (!matches.length) return;
-    current = ((i % matches.length) + matches.length) % matches.length;
+    current = indiceCircular(i, matches.length);
     const r = matches[current];
     const el = r.startContainer.parentElement;
     if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -157,45 +160,74 @@
   }
 
   // ---------- busca profunda ----------
+  // Regras de parada (qualquer uma interrompe o scroll):
+  //   - encontrou o termo
+  //   - usuário cancelou (Esc, fechar overlay, nova busca)
+  //   - limite de passos ou de tempo
+  //   - página estagnada: altura do documento não cresceu por STAGNANT_LIMIT
+  //     passos consecutivos (em feed infinito o scrollY sempre cresce — a
+  //     altura total é o sinal honesto de que não há mais nada carregando)
   async function deepFind() {
-    if (searching) return;
-    searching = true;
+    const meuId = ++buscaId;
+    const cancelado = () => meuId !== buscaId;
+
     matches = [];
     current = -1;
     clearHighlights();
     updateCount();
     statusEl.textContent = "procurando…";
-    const start = Date.now();
-    let steps = 0;
-    let lastScroll = -1;
+    const inicio = Date.now();
+    let passos = 0;
+    let estagnacao = { alturaAnterior: -1, passosSemCrescimento: 0, estagnado: false };
 
-    while (steps < MAX_STEPS && Date.now() - start < MAX_WAIT_MS) {
+    while (true) {
+      const limite = verificarLimites({
+        passos,
+        maxPassos: MAX_STEPS,
+        decorridoMs: Date.now() - inicio,
+        maxEsperaMs: MAX_WAIT_MS,
+        cancelado: cancelado(),
+      });
+      if (!limite.continuar) break;
+
       matches = collectRanges(query);
       if (matches.length) {
         statusEl.textContent = "";
-        searching = false;
         goTo(0);
         return;
       }
-      const y = window.scrollY;
-      if (Math.abs(y - lastScroll) < 2) break;
-      lastScroll = y;
+
+      if (estagnacao.estagnado) break;
+
       window.scrollBy({ top: window.innerHeight * 0.8, behavior: "instant" });
-      steps++;
+      passos++;
       await new Promise((r) => setTimeout(r, STEP_MS));
+
+      estagnacao = rastrearEstagnacao(
+        estagnacao,
+        document.documentElement.scrollHeight,
+        STAGNANT_LIMIT
+      );
+
+      // O feed virtualizado pode re-renderizar e roubar o foco do input;
+      // sem foco, a próxima tecla cai na página (ex.: abre o composer do X).
+      if (host.isConnected && document.activeElement !== host) input.focus();
     }
+
+    if (cancelado()) return;
 
     // tenta também do topo (a palavra pode estar acima)
     window.scrollTo({ top: 0, behavior: "instant" });
     await new Promise((r) => setTimeout(r, STEP_MS));
+    if (cancelado()) return;
     matches = collectRanges(query);
     statusEl.textContent = matches.length ? "" : "não encontrado";
-    searching = false;
     if (matches.length) goTo(0);
     else updateCount();
   }
 
   function onQuery(q) {
+    buscaId++; // nova busca cancela qualquer scroll em andamento
     query = q;
     current = -1;
     if (!q.trim()) { matches = []; paint(); updateCount(); statusEl.textContent = ""; return; }

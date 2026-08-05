@@ -21,9 +21,12 @@ jobs:
 
       - name: Validação (mesma do CI)
         run: |
+          node --check src/search-core.js
           node --check src/content.js
           node scripts/validate-manifest.mjs
           node --test
+          npm ci
+          npx cucumber-js
 
       - name: Versão a partir do manifest
         id: version

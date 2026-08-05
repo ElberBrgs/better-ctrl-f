@@ -1,0 +1,14 @@
+{
+  "name": "better-ctrl-f",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Busca na página sem limites de scroll — testes BDD do Better Ctrl+F",
+  "scripts": {
+    "test": "node --check src/search-core.js && node --check src/content.js && node scripts/validate-manifest.mjs && node --test",
+    "test:bdd": "cucumber-js",
+    "coverage": "node --test --experimental-test-coverage"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^11.2.0"
+  }
+}

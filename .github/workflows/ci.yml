@@ -19,11 +19,18 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Sintaxe do content script
-        run: node --check src/content.js
+      - name: Sintaxe dos content scripts
+        run: |
+          node --check src/search-core.js
+          node --check src/content.js
 
       - name: Manifest válido e campos obrigatórios
         run: node scripts/validate-manifest.mjs
 
       - name: Testes de unidade (normalização)
         run: node --test
+
+      - name: Testes BDD (Gherkin)
+        run: |
+          npm ci
+          npx cucumber-js

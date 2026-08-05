@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Better Ctrl+F",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Busca avançada na página: encontra qualquer texto mesmo fora da área visível, inclusive em páginas com scroll infinito como o X (Twitter).",
   "action": {
     "default_title": "Finder-C (Ctrl+F)",
@@ -16,7 +16,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["src/content.js"],
+      "js": ["src/search-core.js", "src/content.js"],
       "run_at": "document_idle"
     }
   ],
