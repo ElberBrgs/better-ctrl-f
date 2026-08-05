@@ -6,7 +6,7 @@ import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 const core = require("../src/search-core.js");
-const { normalize, verificarLimites, rastrearEstagnacao, indiceCircular } = core;
+const { normalize, verificarLimites, rastrearEstagnacao, indiceCircular, gerarFases } = core;
 
 // ---------- normalize ----------
 test("normalize: ignora acentos", () => {
@@ -103,4 +103,28 @@ test("indiceCircular: navega próximo/anterior com wrap-around", () => {
 
 test("indiceCircular: sem ocorrências retorna -1", () => {
   assert.equal(indiceCircular(0, 0), -1);
+});
+
+// ---------- gerarFases ----------
+test("gerarFases: no topo da página, só desce (fase única)", () => {
+  assert.deepEqual(gerarFases(0), [{ inicio: 0, fim: Infinity }]);
+});
+
+test("gerarFases: no meio da página, desce e depois cobre o que ficou acima", () => {
+  const fases = gerarFases(3000);
+  assert.equal(fases.length, 2);
+  assert.deepEqual(fases[0], { inicio: 3000, fim: Infinity }); // descer até o fim
+  assert.deepEqual(fases[1], { inicio: 0, fim: 3000 });        // topo até a origem
+});
+
+test("gerarFases: a segunda fase nunca ultrapassa a posição de origem", () => {
+  for (const origem of [1, 800, 12345]) {
+    const [, faseCima] = gerarFases(origem);
+    assert.equal(faseCima.fim, origem);
+  }
+});
+
+test("gerarFases: origem inválida/negativa é tratada como topo", () => {
+  assert.deepEqual(gerarFases(-50), [{ inicio: 0, fim: Infinity }]);
+  assert.deepEqual(gerarFases(undefined), [{ inicio: 0, fim: Infinity }]);
 });

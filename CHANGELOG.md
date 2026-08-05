@@ -5,6 +5,13 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [0.4.0] - 2026-08-05
+
+### Adicionado
+
+- **Varredura bidirecional**: se o termo não é encontrado descendo, a busca volta ao topo e varre até a posição de origem — em páginas virtualizadas, o conteúdo que ficou para trás também sai do DOM, e antes era impossível achá-lo. Planejamento de fases em `gerarFases()` (núcleo puro, coberto por testes).
+- 4 novos testes de unidade e 3 novos cenários Gherkin (`varredura-bidirecional.feature`); caso de aceite A10 no plano de QA.
+
 ## [0.3.0] - 2026-08-05
 
 ### Corrigido
@@ -54,6 +61,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - MVP: interceptação de `Ctrl+F` com busca profunda — auto-scroll em etapas para carregar conteúdo virtualizado (ex.: X/Twitter) até encontrar o termo.
 - Normalização de texto que ignora acentos e maiúsculas/minúsculas.
 
+[0.4.0]: https://github.com/ElberBrgs/better-ctrl-f/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/ElberBrgs/better-ctrl-f/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/ElberBrgs/better-ctrl-f/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/ElberBrgs/better-ctrl-f/compare/v0.1.0...v0.2.0

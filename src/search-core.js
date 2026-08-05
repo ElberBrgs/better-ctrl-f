@@ -44,5 +44,17 @@
     return ((i % total) + total) % total;
   }
 
-  return { normalize, verificarLimites, rastrearEstagnacao, indiceCircular };
+  // Planeja as fases da varredura para cobrir a página inteira.
+  // O termo pode estar ABAIXO da posição atual (fase 1: descer até o fim)
+  // ou ACIMA dela (fase 2: voltar ao topo e descer até a origem) — em
+  // páginas virtualizadas, o conteúdo acima também sai do DOM ao rolar.
+  // Retorna [{ inicio, fim }] com fim = Infinity na última fase.
+  function gerarFases(origemY) {
+    const origem = Math.max(0, origemY || 0);
+    const fases = [{ inicio: origem, fim: Infinity }];
+    if (origem > 0) fases.push({ inicio: 0, fim: origem });
+    return fases;
+  }
+
+  return { normalize, verificarLimites, rastrearEstagnacao, indiceCircular, gerarFases };
 });

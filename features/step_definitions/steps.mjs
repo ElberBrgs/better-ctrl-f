@@ -86,3 +86,38 @@ When("o usuário navega para o índice {int}", function (i) {
 Then("a ocorrência atual é a de índice {int}", function (esperado) {
   assert.equal(this.indice, esperado);
 });
+
+// ---------- varredura-bidirecional.feature ----------
+Given("que o usuário está na posição de scroll {int}", function (y) {
+  this.origem = y;
+});
+
+When("as fases da varredura são planejadas", function () {
+  this.fases = core.gerarFases(this.origem);
+});
+
+Then("há {int} fase, começando em {int} e sem limite final", function (total, inicio) {
+  assert.equal(this.fases.length, total);
+  assert.equal(this.fases[0].inicio, inicio);
+  assert.equal(this.fases[0].fim, Infinity);
+});
+
+Then("há {int} fases", function (total) {
+  assert.equal(this.fases.length, total);
+});
+
+Then("a fase {int} começa em {int} e não tem limite final", function (n, inicio) {
+  const f = this.fases[n - 1];
+  assert.equal(f.inicio, inicio);
+  assert.equal(f.fim, Infinity);
+});
+
+Then("a fase {int} começa em {int} e termina em {int}", function (n, inicio, fim) {
+  const f = this.fases[n - 1];
+  assert.equal(f.inicio, inicio);
+  assert.equal(f.fim, fim);
+});
+
+Then("a fase {int} termina em {int}", function (n, fim) {
+  assert.equal(this.fases[n - 1].fim, fim);
+});

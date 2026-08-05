@@ -26,6 +26,7 @@ Ambiente: Microsoft Edge, `x.com/home` com login ativo, extensão carregada.
 | A7 | Acentos e caixa | Buscar `voce` tendo "você" no feed | Encontra "você" |
 | A8 | Wrap-around | Com várias ocorrências, `Shift+Enter` na primeira | Vai para a última; contador `m/m` |
 | A9 | Texto selecionado | Selecionar texto no feed e `Ctrl+F` | Overlay abre pré-preenchido e já busca |
+| A10 | Varredura para cima | Rolar bem para baixo, `Ctrl+F` e buscar palavra de um tweet do topo (já fora do DOM) | Busca desce até o fim, volta ao topo, encontra e salta para a ocorrência acima da origem |
 
 ## Registro de defeitos
 
@@ -34,6 +35,7 @@ Ambiente: Microsoft Edge, `x.com/home` com login ativo, extensão carregada.
 | BUG-01 | Destaques antigos persistiam em busca sem resultado | highlights não eram limpos ao iniciar nova busca | `clearHighlights()` no início da busca profunda (v0.2.1) | A3 |
 | BUG-02 | Composer do X abria ao digitar no overlay | handlers globais da página viam as teclas (evento `composed` atravessa o shadow root); foco do input era perdido durante re-render do feed virtualizado | `contentEditable` no host (handlers tratam como campo editável) + retenção de foco a cada passo da busca profunda (v0.3.0) | A6 |
 | BUG-03 | Scroll infinito quando o termo não existe | feed infinito sempre cresce → loop nunca detectava fim; loop não verificava cancelamento | limites 60 passos/15 s, detecção de estagnação por altura do documento, token de cancelamento (v0.3.0) | A3, A4, A5 + features `busca-profunda.feature` |
+| GAP-01 | Termo acima da posição atual não era encontrado | a varredura só descia; a tentativa "do topo" olhava uma única viewport, sem varrer | varredura bidirecional em fases: desce até o fim, depois do topo até a origem (v0.4.0) | A10 + feature `varredura-bidirecional.feature` |
 
 ## Procedimento de regressão
 

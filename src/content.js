@@ -7,7 +7,7 @@
   if (window.__finderCLoaded) return;
   window.__finderCLoaded = true;
 
-  const { normalize, verificarLimites, rastrearEstagnacao, indiceCircular } =
+  const { normalize, verificarLimites, rastrearEstagnacao, indiceCircular, gerarFases } =
     window.BetterCtrlFCore;
 
   const STEP_MS = 220;
@@ -160,6 +160,10 @@
   }
 
   // ---------- busca profunda ----------
+  // Varredura bidirecional (fases geradas por gerarFases):
+  //   fase 1 — da posição atual até o fim da página
+  //   fase 2 — do topo até a posição de origem (o termo pode estar ACIMA,
+  //            e páginas virtualizadas também desrenderizam o que ficou para trás)
   // Regras de parada (qualquer uma interrompe o scroll):
   //   - encontrou o termo
   //   - usuário cancelou (Esc, fechar overlay, nova busca)
@@ -178,52 +182,61 @@
     statusEl.textContent = "procurando…";
     const inicio = Date.now();
     let passos = 0;
-    let estagnacao = { alturaAnterior: -1, passosSemCrescimento: 0, estagnado: false };
+    const fases = gerarFases(window.scrollY);
 
-    while (true) {
-      const limite = verificarLimites({
-        passos,
-        maxPassos: MAX_STEPS,
-        decorridoMs: Date.now() - inicio,
-        maxEsperaMs: MAX_WAIT_MS,
-        cancelado: cancelado(),
-      });
-      if (!limite.continuar) break;
+    for (const fase of fases) {
+      window.scrollTo({ top: fase.inicio, behavior: "instant" });
+      await new Promise((r) => setTimeout(r, STEP_MS));
+      let estagnacao = { alturaAnterior: -1, passosSemCrescimento: 0, estagnado: false };
 
-      matches = collectRanges(query);
-      if (matches.length) {
-        statusEl.textContent = "";
-        goTo(0);
-        return;
+      while (true) {
+        const limite = verificarLimites({
+          passos,
+          maxPassos: MAX_STEPS,
+          decorridoMs: Date.now() - inicio,
+          maxEsperaMs: MAX_WAIT_MS,
+          cancelado: cancelado(),
+        });
+        if (!limite.continuar) return finalizarNaoEncontrado();
+        if (cancelado()) return;
+
+        matches = collectRanges(query);
+        if (matches.length) {
+          statusEl.textContent = "";
+          goTo(0);
+          return;
+        }
+
+        if (estagnacao.estagnado) break;             // próxima fase
+        if (Number.isFinite(fase.fim) && window.scrollY >= fase.fim) break;
+
+        window.scrollBy({ top: window.innerHeight * 0.8, behavior: "instant" });
+        passos++;
+        await new Promise((r) => setTimeout(r, STEP_MS));
+
+        estagnacao = rastrearEstagnacao(
+          estagnacao,
+          document.documentElement.scrollHeight,
+          STAGNANT_LIMIT
+        );
+
+        // O feed virtualizado pode re-renderizar e roubar o foco do input;
+        // sem foco, a próxima tecla cai na página (ex.: abre o composer do X).
+        if (host.isConnected && document.activeElement !== host) input.focus();
       }
 
-      if (estagnacao.estagnado) break;
-
-      window.scrollBy({ top: window.innerHeight * 0.8, behavior: "instant" });
-      passos++;
-      await new Promise((r) => setTimeout(r, STEP_MS));
-
-      estagnacao = rastrearEstagnacao(
-        estagnacao,
-        document.documentElement.scrollHeight,
-        STAGNANT_LIMIT
-      );
-
-      // O feed virtualizado pode re-renderizar e roubar o foco do input;
-      // sem foco, a próxima tecla cai na página (ex.: abre o composer do X).
-      if (host.isConnected && document.activeElement !== host) input.focus();
+      if (cancelado()) return;
     }
 
-    if (cancelado()) return;
+    finalizarNaoEncontrado();
 
-    // tenta também do topo (a palavra pode estar acima)
-    window.scrollTo({ top: 0, behavior: "instant" });
-    await new Promise((r) => setTimeout(r, STEP_MS));
-    if (cancelado()) return;
-    matches = collectRanges(query);
-    statusEl.textContent = matches.length ? "" : "não encontrado";
-    if (matches.length) goTo(0);
-    else updateCount();
+    function finalizarNaoEncontrado() {
+      if (cancelado()) return;
+      matches = collectRanges(query);
+      statusEl.textContent = matches.length ? "" : "não encontrado";
+      if (matches.length) goTo(0);
+      else updateCount();
+    }
   }
 
   function onQuery(q) {

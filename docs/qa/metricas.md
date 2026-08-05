@@ -8,7 +8,7 @@ Medidas em 2026-08-05 (v0.3.0). Fontes: `node --test --experimental-test-coverag
 | --- | --- | --- |
 | Linhas | **100%** | ≥ 95% |
 | Funções | **100%** | 100% |
-| Branches | **84,21%** | ≥ 80% |
+| Branches | **86,36%** | ≥ 80% |
 
 `src/content.js` (DOM/Shadow/scroll) é intencionalmente fora da cobertura unitária — a lógica de decisão foi extraída para o núcleo puro justamente para ser 100% testável offline; a integração é coberta pelo checklist de aceite (A1–A9).
 
@@ -16,8 +16,8 @@ Medidas em 2026-08-05 (v0.3.0). Fontes: `node --test --experimental-test-coverag
 
 | Suíte | Quantidade | Status |
 | --- | --- | --- |
-| Unidade (node:test) | 15 testes | ✅ 100% passando |
-| BDD (cucumber-js) | 10 cenários / 30 steps | ✅ 100% passando |
+| Unidade (node:test) | 19 testes | ✅ 100% passando |
+| BDD (cucumber-js) | 13 cenários / 41 steps | ✅ 100% passando |
 | CI (push/PR) | estática + unidade + BDD | ✅ verde |
 | Release pipeline | revalida tudo antes de empacotar | ✅ verde |
 
